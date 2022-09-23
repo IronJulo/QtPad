@@ -15,6 +15,14 @@ public:
     QtPad(QWidget *parent = nullptr);
     ~QtPad();
 
+private slots:
+    void newDocument();
+    void openDocument();
+    void saveDocument();
+    void saveDocumentAs();
+    void printDoument();
+    void exitApp();
+
 private:
     Ui::QtPad *ui;
 };
