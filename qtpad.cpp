@@ -64,10 +64,10 @@ void QtPad::openFolder()
     fsModel->setRootPath(m_currentFolder);
     m_ui->treeView->setModel(fsModel);
     m_ui->treeView->setRootIndex(fsModel->index(m_currentFolder));
-
     m_ui->treeView->hideColumn(1);
     m_ui->treeView->hideColumn(2);
     m_ui->treeView->hideColumn(3);
+
     qDebug() << "dir: " << m_currentFolder;
 }
 void QtPad::saveFile()
