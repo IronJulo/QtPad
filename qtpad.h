@@ -18,13 +18,14 @@ public:
 private slots:
     void newDocument();
     void openDocument();
+    void openFolder();
     void saveDocument();
     void saveDocumentAs();
-    void printDoument();
     void exitApp();
 
 private:
     Ui::QtPad *m_ui;
     QString m_currentFile;
+    QString m_currentFolder;
 };
 #endif // QTPAD_H

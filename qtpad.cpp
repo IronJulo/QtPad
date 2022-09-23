@@ -1,6 +1,7 @@
 #include <QDebug>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QFileSystemModel>
 
 #include "qtpad.h"
 #include "ui_qtpad.h"
@@ -11,8 +12,8 @@ QtPad::QtPad(QWidget *parent)
 {
     m_ui->setupUi(this);
     connect(m_ui->actionNew, &QAction::triggered, this, &QtPad::newDocument);
-    connect(m_ui->actionOpen, &QAction::triggered, this, &QtPad::openDocument);
-    connect(m_ui->actionPrint, &QAction::triggered, this, &QtPad::printDoument);
+    connect(m_ui->actionOpen_File, &QAction::triggered, this, &QtPad::openDocument);
+    connect(m_ui->actionOpen_Folder, &QAction::triggered, this, &QtPad::openFolder);
     connect(m_ui->actionSave, &QAction::triggered, this, &QtPad::saveDocument);
     connect(m_ui->actionSave_as, &QAction::triggered, this, &QtPad::saveDocumentAs);
     connect(m_ui->actionExit, &QAction::triggered, this, &QtPad::exitApp);
@@ -45,6 +46,19 @@ void QtPad::openDocument()
 
     qDebug() << "Open document (QtPad)";
 }
+void QtPad::openFolder()
+{
+    m_currentFolder = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
+                                                 "/home",
+                                                 QFileDialog::ShowDirsOnly
+                                                 | QFileDialog::DontResolveSymlinks);
+
+    QFileSystemModel *fsModel = new QFileSystemModel(this);
+    fsModel->setRootPath(m_currentFolder);
+    m_ui->treeView->setModel(fsModel);
+    //m_ui->treeView->setRootIndex(fsModel->index("/"));
+    qDebug() << "dir: " << m_currentFolder;
+}
 void QtPad::saveDocument()
 {
     if (m_currentFile.isEmpty()){
@@ -67,13 +81,23 @@ void QtPad::saveDocument()
 }
 void QtPad::saveDocumentAs()
 {
+    m_currentFile = QFileDialog::getSaveFileName(this, "save file name");
+    QFile file(m_currentFile);
+
+    if (!file.open(QIODevice::WriteOnly | QFile::Text)) {
+        QMessageBox::warning(this, "Warning", "Cannot save file: " + file.errorString());
+        return;
+    }
+    setWindowTitle(m_currentFile);
+
+    QTextStream out(&file);
+    QString  text = m_ui->textEdit->toPlainText();
+    out << text;
+    file.close();
     qDebug() << "Save document as (QtPad)";
-}
-void QtPad::printDoument()
-{
-    qDebug() << "Print document (QtPad)";
 }
 void QtPad::exitApp()
 {
     qDebug() << "Exit app (QtPad)";
+    exit(0);
 }
