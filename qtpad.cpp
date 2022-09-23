@@ -8,7 +8,6 @@ QtPad::QtPad(QWidget *parent)
     , ui(new Ui::QtPad)
 {
     ui->setupUi(this);
-
     connect(ui->actionNew, &QAction::triggered, this, &QtPad::newDocument);
     connect(ui->actionOpen, &QAction::triggered, this, &QtPad::openDocument);
     connect(ui->actionPrint, &QAction::triggered, this, &QtPad::printDoument);
