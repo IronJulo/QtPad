@@ -16,11 +16,12 @@ public:
     ~QtPad();
 
 private slots:
-    void newDocument();
-    void openDocument();
+    void newFile();
+    void openFile();
+    void openFileFromTree();
     void openFolder();
-    void saveDocument();
-    void saveDocumentAs();
+    void saveFile();
+    void saveFileAs();
     void exitApp();
 
 private:
