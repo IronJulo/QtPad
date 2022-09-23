@@ -24,6 +24,7 @@ private slots:
     void exitApp();
 
 private:
-    Ui::QtPad *ui;
+    Ui::QtPad *m_ui;
+    QString m_currentFile;
 };
 #endif // QTPAD_H
