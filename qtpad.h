@@ -1,6 +1,7 @@
 #ifndef QTPAD_H
 #define QTPAD_H
 
+#include <QFileSystemModel>
 #include <QMainWindow>
 
 QT_BEGIN_NAMESPACE
@@ -16,17 +17,23 @@ public:
     ~QtPad();
 
 private slots:
-    void newFile();
+    void s_newFile();
+    void s_openFile();
+    void s_openFolder();
+    void s_saveFile();
+    void s_saveFileAs();
+    void s_exitApp();
+
+    void s_treeFileClicked(const QModelIndex &index);
+
+private:
     void openFile();
-    void openFileFromTree();
-    void openFolder();
-    void saveFile();
-    void saveFileAs();
-    void exitApp();
 
 private:
     Ui::QtPad *m_ui;
-    QString m_currentFile;
-    QString m_currentFolder;
+    QFileSystemModel *m_fsModel;
+    QString m_currentFilePath;
+    QString m_currentFileName;
+    QString m_currentFolderPath;
 };
 #endif // QTPAD_H

@@ -11,95 +11,87 @@ QtPad::QtPad(QWidget *parent)
     , m_ui(new Ui::QtPad)
 {
     m_ui->setupUi(this);
-    connect(m_ui->actionNew, &QAction::triggered, this, &QtPad::newFile);
-    connect(m_ui->actionOpen_File, &QAction::triggered, this, &QtPad::openFile);
-    connect(m_ui->actionOpen_Folder, &QAction::triggered, this, &QtPad::openFolder);
-    //connect(m_ui->treeView, &QAction::triggered, this, &QtPad::openFileFromTree);
-    connect(m_ui->actionSave, &QAction::triggered, this, &QtPad::saveFile);
-    connect(m_ui->actionSave_as, &QAction::triggered, this, &QtPad::saveFileAs);
-    connect(m_ui->actionExit, &QAction::triggered, this, &QtPad::exitApp);
+    connect(m_ui->actionNew, &QAction::triggered, this, &QtPad::s_newFile);
+    connect(m_ui->actionOpen_File, &QAction::triggered, this, &QtPad::s_openFile);
+    connect(m_ui->actionOpen_Folder, &QAction::triggered, this, &QtPad::s_openFolder);
+    connect(m_ui->actionSave, &QAction::triggered, this, &QtPad::s_saveFile);
+    connect(m_ui->actionSave_as, &QAction::triggered, this, &QtPad::s_saveFileAs);
+    connect(m_ui->actionExit, &QAction::triggered, this, &QtPad::s_exitApp);
+
+    connect(m_ui->treeView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(s_treeFileClicked(QModelIndex)));
 }
 
 QtPad::~QtPad()
 {
     delete m_ui;
 }
-void QtPad::newFile()
+void QtPad::s_newFile()
 {
-    m_currentFile.clear();
+    m_currentFileName = "new";
+    m_currentFilePath.clear();
     m_ui->textEdit->setText(QString());
     qDebug() << "New document (QtPad)";
 }
-void QtPad::openFile()
+
+void QtPad::s_openFile()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, "Choose your file");
-    QFile file(fileName);
-    m_currentFile = fileName;
-    if (!file.open(QIODevice::ReadOnly | QFile::Text)) {
-        QMessageBox::warning(this, "Warning", "Cannot open file: " + file.errorString());
-        return;
-    }
-
-
-    setWindowTitle(fileName);
-    QTextStream in(&file);
-    QString text = in.readAll();
-    m_ui->textEdit->setText(text);
-    file.close();
-
-    qDebug() << "Open document (QtPad)";
+    m_currentFilePath = QFileDialog::getOpenFileName(this, "Choose your file");
+    m_currentFileName = m_currentFilePath.split("/").back();
+    openFile();
 }
-void QtPad::openFileFromTree()
-{
 
-}
-void QtPad::openFolder()
+void QtPad::s_openFolder()
 {
-    m_currentFolder = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
+    m_currentFolderPath = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
                                                  "/home",
                                                  QFileDialog::ShowDirsOnly
                                                  | QFileDialog::DontResolveSymlinks);
 
-    QFileSystemModel *fsModel = new QFileSystemModel(this);
-    fsModel->setRootPath(m_currentFolder);
-    m_ui->treeView->setModel(fsModel);
-    m_ui->treeView->setRootIndex(fsModel->index(m_currentFolder));
+    m_fsModel = new QFileSystemModel(this);
+    m_fsModel->setRootPath(m_currentFolderPath);
+    m_ui->treeView->setModel(m_fsModel);
+    m_ui->treeView->setRootIndex(m_fsModel->index(m_currentFolderPath));
+
     m_ui->treeView->hideColumn(1);
     m_ui->treeView->hideColumn(2);
     m_ui->treeView->hideColumn(3);
+    m_ui->treeView->header()->hide();
 
-    qDebug() << "dir: " << m_currentFolder;
+    qDebug() << "dir: " << m_currentFolderPath;
 }
-void QtPad::saveFile()
-{
-    if (m_currentFile.isEmpty()){
-        m_currentFile = QFileDialog::getSaveFileName(this, "save file name");
-    }
 
-    QFile file(m_currentFile);
+void QtPad::s_saveFile()
+{
+    if (m_currentFilePath.isEmpty()){
+        m_currentFilePath = QFileDialog::getSaveFileName(this, "save file name");
+    }
+    m_currentFileName = m_currentFilePath.split("/").back();
+
+    QFile file(m_currentFilePath);
 
     if (!file.open(QIODevice::WriteOnly | QFile::Text)) {
         QMessageBox::warning(this, "Warning", "Cannot save file: " + file.errorString());
         return;
     }
-    setWindowTitle(m_currentFile);
+    setWindowTitle(m_currentFileName); //todo
 
     QTextStream out(&file);
     QString  text = m_ui->textEdit->toPlainText();
     out << text;
     file.close();
-    qDebug() << "Save document (QtPad)";
+    qDebug() << "Save document (save as)" << m_currentFilePath;
 }
-void QtPad::saveFileAs()
+
+void QtPad::s_saveFileAs()
 {
-    m_currentFile = QFileDialog::getSaveFileName(this, "save file name");
-    QFile file(m_currentFile);
+    m_currentFilePath = QFileDialog::getSaveFileName(this, "save file name");
+    QFile file(m_currentFilePath);
 
     if (!file.open(QIODevice::WriteOnly | QFile::Text)) {
         QMessageBox::warning(this, "Warning", "Cannot save file: " + file.errorString());
         return;
     }
-    setWindowTitle(m_currentFile);
+    m_currentFileName = m_currentFilePath.split("/").back();
 
     QTextStream out(&file);
     QString  text = m_ui->textEdit->toPlainText();
@@ -107,8 +99,43 @@ void QtPad::saveFileAs()
     file.close();
     qDebug() << "Save document as (QtPad)";
 }
-void QtPad::exitApp()
+
+void QtPad::s_exitApp()
 {
     qDebug() << "Exit app (QtPad)";
     exit(0);
 }
+
+void QtPad::s_treeFileClicked(const QModelIndex &index) {
+    if (!m_fsModel->isDir(index))
+    {
+        m_currentFilePath = m_fsModel->filePath(index);
+        m_currentFileName = m_fsModel->fileName(index);
+
+        qDebug() << "Selected document m_currentFilePath: " << m_currentFilePath;
+        qDebug() << "Selected document m_currentFileName: " << m_currentFileName;
+        openFile();
+    }
+}
+
+
+
+void QtPad::openFile()
+{
+    QFile file(m_currentFilePath);
+
+    if (!file.open(QIODevice::ReadOnly | QFile::Text)) {
+        QMessageBox::warning(this, "Warning", "Cannot open file: " + file.errorString());
+        return;
+    }
+
+    setWindowTitle(m_currentFileName); //todo
+    QTextStream in(&file);
+    QString text = in.readAll();
+    m_ui->textEdit->setText(text);
+    file.close();
+
+    qDebug() << "Open document m_currentFilePath: " << m_currentFilePath;
+    qDebug() << "Open document m_currentFileName: " << m_currentFileName;
+}
+
