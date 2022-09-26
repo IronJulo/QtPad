@@ -29,7 +29,7 @@ void QtPad::s_newFile()
 {
     m_currentFileName = "new";
     m_currentFilePath.clear();
-    m_ui->textEdit->setText(QString());
+    m_ui->plainTextEdit->clear();
     qDebug() << "New document (QtPad)";
 }
 
@@ -76,7 +76,7 @@ void QtPad::s_saveFile()
     setWindowTitle(m_currentFileName); //todo
 
     QTextStream out(&file);
-    QString  text = m_ui->textEdit->toPlainText();
+    QString  text = m_ui->plainTextEdit->toPlainText();
     out << text;
     file.close();
     qDebug() << "Save document (save as)" << m_currentFilePath;
@@ -117,7 +117,7 @@ void QtPad::saveFile()
     }
 
     QTextStream out(&file);
-    QString  text = m_ui->textEdit->toPlainText();
+    QString  text = m_ui->plainTextEdit->toPlainText();
     out << text;
     file.close();
     qDebug() << "Saved document";
@@ -135,7 +135,7 @@ void QtPad::openFile()
     setWindowTitle(m_currentFileName); //todo
     QTextStream in(&file);
     QString text = in.readAll();
-    m_ui->textEdit->setText(text);
+    m_ui->plainTextEdit->setPlainText(text);
     file.close();
 
     qDebug() << "Open document m_currentFilePath: " << m_currentFilePath;

@@ -50,7 +50,7 @@
          </sizepolicy>
         </property>
        </widget>
-       <widget class="QTextEdit" name="textEdit">
+       <widget class="QPlainTextEdit" name="plainTextEdit">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
           <horstretch>200</horstretch>
