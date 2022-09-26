@@ -85,19 +85,7 @@ void QtPad::s_saveFile()
 void QtPad::s_saveFileAs()
 {
     m_currentFilePath = QFileDialog::getSaveFileName(this, "save file name");
-    QFile file(m_currentFilePath);
-
-    if (!file.open(QIODevice::WriteOnly | QFile::Text)) {
-        QMessageBox::warning(this, "Warning", "Cannot save file: " + file.errorString());
-        return;
-    }
-    m_currentFileName = m_currentFilePath.split("/").back();
-
-    QTextStream out(&file);
-    QString  text = m_ui->textEdit->toPlainText();
-    out << text;
-    file.close();
-    qDebug() << "Save document as (QtPad)";
+    saveFile();
 }
 
 void QtPad::s_exitApp()
@@ -119,6 +107,21 @@ void QtPad::s_treeFileClicked(const QModelIndex &index) {
 }
 
 
+void QtPad::saveFile()
+{
+    QFile file(m_currentFilePath);
+
+    if (!file.open(QIODevice::WriteOnly | QFile::Text)) {
+        QMessageBox::warning(this, "Warning", "Cannot save file: " + file.errorString());
+        return;
+    }
+
+    QTextStream out(&file);
+    QString  text = m_ui->textEdit->toPlainText();
+    out << text;
+    file.close();
+    qDebug() << "Saved document";
+}
 
 void QtPad::openFile()
 {

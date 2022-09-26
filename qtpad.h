@@ -28,6 +28,7 @@ private slots:
 
 private:
     void openFile();
+    void saveFile();
 
 private:
     Ui::QtPad *m_ui;
