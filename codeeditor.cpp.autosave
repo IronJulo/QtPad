@@ -1,8 +1,0 @@
-#include <QPlainTextEdit>
-#include "codeeditor.h"
-
-CodeEditor::CodeEditor(QObject *parent)
-    : QplainTextEdit(parent)
-{
-
-}

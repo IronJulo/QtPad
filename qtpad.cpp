@@ -3,6 +3,7 @@
 #include <QMessageBox>
 #include <QFileSystemModel>
 
+#include "codeeditor.h"
 #include "qtpad.h"
 #include "ui_qtpad.h"
 
