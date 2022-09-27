@@ -8,22 +8,14 @@
 class LineNumberArea : public QWidget
 {
 public:
-    LineNumberArea(CodeEditor *editor) : QWidget(editor), codeEditor(editor)
-    {}
-
-    QSize sizeHint() const override
-    {
-        return QSize(codeEditor->lineNumberAreaWidth(), 0);
-    }
+    LineNumberArea(CodeEditor *editor);
+    QSize sizeHint() const override;
 
 protected:
-    void paintEvent(QPaintEvent *event) override
-    {
-        codeEditor->lineNumberAreaPaintEvent(event);
-    }
+    void paintEvent(QPaintEvent *event) override;
 
 private:
-    CodeEditor *codeEditor;
+    CodeEditor *m_codeEditor;
 };
 
-#endif // LINENUMBERAREA_H
+#endif
