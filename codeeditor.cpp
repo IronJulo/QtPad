@@ -16,6 +16,28 @@ CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent)
     updateLineNumberAreaWidth(0);
     highlightCurrentLine();
 }
+
+CodeEditor::~CodeEditor()
+{
+
+}
+
+QString CodeEditor::getFilePath() const
+{
+    return "toto";
+}
+QString CodeEditor::getFileName() const
+{
+    return "titi/tutu/toto";
+}
+void CodeEditor::setFilePath(QString path)
+{
+    m_filePath = path;
+}
+void CodeEditor::setFileName(QString name)
+{
+    m_fileName = name;
+}
 int CodeEditor::lineNumberAreaWidth()
 {
     int digits = 1;

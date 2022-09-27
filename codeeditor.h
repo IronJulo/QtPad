@@ -10,11 +10,16 @@ class CodeEditor : public QPlainTextEdit
 
 public:
     CodeEditor(QWidget *parent = nullptr);
-
+    ~CodeEditor();
     void lineNumberAreaPaintEvent(QPaintEvent *event);
     int lineNumberAreaWidth();
 
-protected:
+    QString getFilePath() const;
+    QString getFileName() const;
+    void setFilePath(QString path);
+    void setFileName(QString name);
+
+private:
     void resizeEvent(QResizeEvent *event) override;
 
 private slots:
@@ -24,6 +29,8 @@ private slots:
 
 private:
     QWidget *lineNumberArea;
+    QString m_filePath;
+    QString m_fileName;
 };
 
 #endif // CODEEDITOR_H

@@ -4,6 +4,7 @@
 #include <QFileSystemModel>
 
 #include "codeeditor.h"
+//#include "mytabpage.h"
 #include "qtpad.h"
 #include "ui_qtpad.h"
 
@@ -12,6 +13,14 @@ QtPad::QtPad(QWidget *parent)
     , m_ui(new Ui::QtPad)
 {
     m_ui->setupUi(this);
+    m_ui->tabWidget->setTabsClosable(true);
+
+    m_ui->tabWidget->removeTab(0);
+    m_ui->tabWidget->removeTab(0);
+
+    m_ui-> tabWidget ->addTab(new CodeEditor, tr("name2"));
+    m_ui-> tabWidget ->addTab(new CodeEditor, tr("name1"));
+
     connect(m_ui->actionNew, &QAction::triggered, this, &QtPad::s_newFile);
     connect(m_ui->actionOpen_File, &QAction::triggered, this, &QtPad::s_openFile);
     connect(m_ui->actionOpen_Folder, &QAction::triggered, this, &QtPad::s_openFolder);
@@ -20,6 +29,7 @@ QtPad::QtPad(QWidget *parent)
     connect(m_ui->actionExit, &QAction::triggered, this, &QtPad::s_exitApp);
 
     connect(m_ui->treeView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(s_treeFileClicked(QModelIndex)));
+    connect(m_ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(s_tabChanged(int)));
 }
 
 QtPad::~QtPad()
@@ -28,17 +38,17 @@ QtPad::~QtPad()
 }
 void QtPad::s_newFile()
 {
-    m_currentFileName = "new";
+    /*m_currentFileName = "new";
     m_currentFilePath.clear();
     m_ui->plainTextEdit->clear();
-    qDebug() << "New document (QtPad)";
+    qDebug() << "New document (QtPad)";*/
 }
 
 void QtPad::s_openFile()
 {
-    m_currentFilePath = QFileDialog::getOpenFileName(this, "Choose your file");
+    /*m_currentFilePath = QFileDialog::getOpenFileName(this, "Choose your file");
     m_currentFileName = m_currentFilePath.split("/").back();
-    openFile();
+    openFile();*/
 }
 
 void QtPad::s_openFolder()
@@ -63,29 +73,29 @@ void QtPad::s_openFolder()
 
 void QtPad::s_saveFile()
 {
-    if (m_currentFilePath.isEmpty()){
-        m_currentFilePath = QFileDialog::getSaveFileName(this, "save file name");
+    if (m_currentEditor->getFileName().isEmpty()){
+        m_currentEditor->setFilePath(QFileDialog::getSaveFileName(this, "save file name"));
     }
-    m_currentFileName = m_currentFilePath.split("/").back();
+    //m_currentFileName = m_currentFilePath.split("/").back();
 
-    QFile file(m_currentFilePath);
+    QFile file(m_currentEditor->getFileName());
 
     if (!file.open(QIODevice::WriteOnly | QFile::Text)) {
         QMessageBox::warning(this, "Warning", "Cannot save file: " + file.errorString());
         return;
     }
-    setWindowTitle(m_currentFileName); //todo
+    //setWindowTitle(m_currentFileName); //todo
 
     QTextStream out(&file);
     QString  text = m_ui->plainTextEdit->toPlainText();
     out << text;
     file.close();
-    qDebug() << "Save document (save as)" << m_currentFilePath;
+    //qDebug() << "Save document (save as)" << m_currentFilePath;
 }
 
 void QtPad::s_saveFileAs()
 {
-    m_currentFilePath = QFileDialog::getSaveFileName(this, "save file name");
+    m_currentEditor->setFilePath(QFileDialog::getSaveFileName(this, "save file name"));
     saveFile();
 }
 
@@ -96,21 +106,25 @@ void QtPad::s_exitApp()
 }
 
 void QtPad::s_treeFileClicked(const QModelIndex &index) {
-    if (!m_fsModel->isDir(index))
+    if (!m_fsModel->isDir(index))//TODO open new tab
     {
-        m_currentFilePath = m_fsModel->filePath(index);
+        /*m_currentFilePath = m_fsModel->filePath(index);
         m_currentFileName = m_fsModel->fileName(index);
 
         qDebug() << "Selected document m_currentFilePath: " << m_currentFilePath;
         qDebug() << "Selected document m_currentFileName: " << m_currentFileName;
-        openFile();
+        openFile();*/
     }
 }
-
-
-void QtPad::saveFile()
+void QtPad::s_tabChanged(int index)
 {
-    QFile file(m_currentFilePath);
+    m_currentEditor = (CodeEditor*) m_ui->tabWidget->widget(index); //TODO security checks
+    qDebug() << "Selected tab: " << index;
+}
+
+void QtPad::saveFile() //TODO security checks
+{
+    QFile file(m_currentEditor->getFilePath());
 
     if (!file.open(QIODevice::WriteOnly | QFile::Text)) {
         QMessageBox::warning(this, "Warning", "Cannot save file: " + file.errorString());
@@ -124,22 +138,19 @@ void QtPad::saveFile()
     qDebug() << "Saved document";
 }
 
-void QtPad::openFile()
+void QtPad::openFile()//TODO security checks
 {
-    QFile file(m_currentFilePath);
+    QFile file(m_currentEditor->getFilePath());
 
     if (!file.open(QIODevice::ReadOnly | QFile::Text)) {
         QMessageBox::warning(this, "Warning", "Cannot open file: " + file.errorString());
         return;
     }
 
-    setWindowTitle(m_currentFileName); //todo
+    setWindowTitle(m_currentEditor->getFileName()); //todo
     QTextStream in(&file);
     QString text = in.readAll();
-    m_ui->plainTextEdit->setPlainText(text);
+    m_ui->plainTextEdit->setPlainText(text); //todo
     file.close();
-
-    qDebug() << "Open document m_currentFilePath: " << m_currentFilePath;
-    qDebug() << "Open document m_currentFileName: " << m_currentFileName;
 }
 

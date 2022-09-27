@@ -1,6 +1,8 @@
 #ifndef QTPAD_H
 #define QTPAD_H
 
+#include "codeeditor.h"
+
 #include <QFileSystemModel>
 #include <QMainWindow>
 
@@ -25,6 +27,7 @@ private slots:
     void s_exitApp();
 
     void s_treeFileClicked(const QModelIndex &index);
+    void s_tabChanged(int index);
 
 private:
     void openFile();
@@ -33,8 +36,7 @@ private:
 private:
     Ui::QtPad *m_ui;
     QFileSystemModel *m_fsModel;
-    QString m_currentFilePath;
-    QString m_currentFileName;
+    CodeEditor *m_currentEditor; //TODO nullptr when nonne & security checks
     QString m_currentFolderPath;
 };
 #endif // QTPAD_H
