@@ -1,13 +1,18 @@
 #include <QPlainTextEdit>
 #include <QPainter>
 #include <QTextBlock>
+#include <QDebug>
 
 #include "codeeditor.h"
 #include "linenumberarea.h"
 
-CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent)
+CodeEditor::CodeEditor(QString openedFileName, QString openedFilePath, QWidget *parent)
+    : QPlainTextEdit(parent)
 {
-    lineNumberArea = new LineNumberArea(this);
+    m_lineNumberArea = new LineNumberArea(this);
+    m_fileName = openedFileName;
+    m_filePath = openedFilePath;
+    setPlainText("");
 
     connect(this, &CodeEditor::blockCountChanged, this, &CodeEditor::updateLineNumberAreaWidth);
     connect(this, &CodeEditor::updateRequest, this, &CodeEditor::updateLineNumberArea);
@@ -17,22 +22,27 @@ CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent)
     highlightCurrentLine();
 }
 
+CodeEditor::CodeEditor(QWidget *parent)
+    : CodeEditor("", "", parent)
+{}
+
 CodeEditor::~CodeEditor()
 {
-
+ qDebug() << "deleting code editor";;
 }
 
 QString CodeEditor::getFilePath() const
 {
-    return "toto";
+    return m_filePath;
 }
 QString CodeEditor::getFileName() const
 {
-    return "titi/tutu/toto";
+    return m_fileName;
 }
 void CodeEditor::setFilePath(QString path)
 {
     m_filePath = path;
+    setFileName(getFilePath().split("/").back());
 }
 void CodeEditor::setFileName(QString name)
 {
@@ -60,9 +70,9 @@ void CodeEditor::updateLineNumberAreaWidth(int /* newBlockCount */)
 void CodeEditor::updateLineNumberArea(const QRect &rect, int dy)
 {
     if (dy)
-        lineNumberArea->scroll(0, dy);
+        m_lineNumberArea->scroll(0, dy);
     else
-        lineNumberArea->update(0, rect.y(), lineNumberArea->width(), rect.height());
+        m_lineNumberArea->update(0, rect.y(), m_lineNumberArea->width(), rect.height());
 
     if (rect.contains(viewport()->rect()))
         updateLineNumberAreaWidth(0);
@@ -73,7 +83,7 @@ void CodeEditor::resizeEvent(QResizeEvent *e)
     QPlainTextEdit::resizeEvent(e);
 
     QRect cr = contentsRect();
-    lineNumberArea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
+    m_lineNumberArea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
 }
 
 void CodeEditor::highlightCurrentLine()
@@ -97,7 +107,7 @@ void CodeEditor::highlightCurrentLine()
 
 void CodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
 {
-    QPainter painter(lineNumberArea);
+    QPainter painter(m_lineNumberArea);
     painter.fillRect(event->rect(), Qt::lightGray);
     QTextBlock block = firstVisibleBlock();
     int blockNumber = block.blockNumber();
@@ -107,7 +117,7 @@ void CodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
         if (block.isVisible() && bottom >= event->rect().top()) {
             QString number = QString::number(blockNumber + 1);
             painter.setPen(Qt::black);
-            painter.drawText(0, top, lineNumberArea->width(), fontMetrics().height(),
+            painter.drawText(0, top, m_lineNumberArea->width(), fontMetrics().height(),
                              Qt::AlignRight, number);
         }
 

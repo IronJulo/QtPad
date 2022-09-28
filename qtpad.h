@@ -28,10 +28,12 @@ private slots:
 
     void s_treeFileClicked(const QModelIndex &index);
     void s_tabChanged(int index);
+    void s_closeTab(int index);
 
 private:
     void openFile();
     void saveFile();
+    void addEditor(QString openedFileName, QString openedFilePath);
 
 private:
     Ui::QtPad *m_ui;
