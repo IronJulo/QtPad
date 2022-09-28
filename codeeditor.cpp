@@ -22,10 +22,6 @@ CodeEditor::CodeEditor(QString openedFileName, QString openedFilePath, QWidget *
     highlightCurrentLine();
 }
 
-CodeEditor::CodeEditor(QWidget *parent)
-    : CodeEditor("", "", parent)
-{}
-
 CodeEditor::~CodeEditor()
 {
  qDebug() << "deleting code editor";;
