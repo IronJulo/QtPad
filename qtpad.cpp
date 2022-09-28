@@ -4,7 +4,6 @@
 #include <QFileSystemModel>
 
 #include "codeeditor.h"
-//#include "mytabpage.h"
 #include "qtpad.h"
 #include "ui_qtpad.h"
 
@@ -134,7 +133,7 @@ void QtPad::s_closeTab(int index)
     }
 
 
-    m_ui->tabWidget->removeTab(0);
+    m_ui->tabWidget->removeTab(index);
     if(m_ui->tabWidget->count() != 0){
         m_currentEditor = (CodeEditor*) m_ui->tabWidget->currentWidget();
     }else {
