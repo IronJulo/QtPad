@@ -12,21 +12,30 @@ CodeEditor::CodeEditor(QString openedFileName, QString openedFilePath, QWidget *
     m_lineNumberArea = new LineNumberArea(this);
     m_fileName = openedFileName;
     m_filePath = openedFilePath;
+    m_saved = true;
     setPlainText("");
 
-    connect(this, &CodeEditor::blockCountChanged, this, &CodeEditor::updateLineNumberAreaWidth);
-    connect(this, &CodeEditor::updateRequest, this, &CodeEditor::updateLineNumberArea);
-    connect(this, &CodeEditor::cursorPositionChanged, this, &CodeEditor::highlightCurrentLine);
+    connect(this, &CodeEditor::blockCountChanged, this, &CodeEditor::s_updateLineNumberAreaWidth);
+    connect(this, &CodeEditor::updateRequest, this, &CodeEditor::s_updateLineNumberArea);
+    connect(this, &CodeEditor::cursorPositionChanged, this, &CodeEditor::s_highlightCurrentLine);
+    connect(this, &CodeEditor::textChanged, this, &CodeEditor::s_textEdited);
 
-    updateLineNumberAreaWidth(0);
-    highlightCurrentLine();
+    s_updateLineNumberAreaWidth(0);
+    s_highlightCurrentLine();
 }
 
 CodeEditor::~CodeEditor()
 {
  qDebug() << "deleting code editor";;
 }
-
+void CodeEditor::save()
+{
+    m_saved=true;
+}
+bool CodeEditor::isSaved()
+{
+    return m_saved;
+}
 QString CodeEditor::getFilePath() const
 {
     return m_filePath;
@@ -58,12 +67,12 @@ int CodeEditor::lineNumberAreaWidth()
     return space;
 }
 
-void CodeEditor::updateLineNumberAreaWidth(int /* newBlockCount */)
+void CodeEditor::s_updateLineNumberAreaWidth(int /* newBlockCount */)
 {
     setViewportMargins(lineNumberAreaWidth(), 0, 0, 0);
 }
 
-void CodeEditor::updateLineNumberArea(const QRect &rect, int dy)
+void CodeEditor::s_updateLineNumberArea(const QRect &rect, int dy)
 {
     if (dy)
         m_lineNumberArea->scroll(0, dy);
@@ -71,7 +80,7 @@ void CodeEditor::updateLineNumberArea(const QRect &rect, int dy)
         m_lineNumberArea->update(0, rect.y(), m_lineNumberArea->width(), rect.height());
 
     if (rect.contains(viewport()->rect()))
-        updateLineNumberAreaWidth(0);
+        s_updateLineNumberAreaWidth(0);
 }
 
 void CodeEditor::resizeEvent(QResizeEvent *e)
@@ -82,7 +91,7 @@ void CodeEditor::resizeEvent(QResizeEvent *e)
     m_lineNumberArea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
 }
 
-void CodeEditor::highlightCurrentLine()
+void CodeEditor::s_highlightCurrentLine()
 {
     QList<QTextEdit::ExtraSelection> extraSelections;
 
@@ -122,4 +131,8 @@ void CodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
         bottom = top + qRound(blockBoundingRect(block).height());
         ++blockNumber;
     }
+}
+void CodeEditor::s_textEdited()
+{
+    m_saved = false;
 }

@@ -19,18 +19,23 @@ public:
     void setFilePath(QString path);
     void setFileName(QString name);
 
+    void save();
+    bool isSaved();
+
 private:
     void resizeEvent(QResizeEvent *event) override;
 
 private slots:
-    void updateLineNumberAreaWidth(int newBlockCount);
-    void highlightCurrentLine();
-    void updateLineNumberArea(const QRect &rect, int dy);
+    void s_updateLineNumberAreaWidth(int newBlockCount);
+    void s_highlightCurrentLine();
+    void s_updateLineNumberArea(const QRect &rect, int dy);
+    void s_textEdited();
 
 private:
     QWidget *m_lineNumberArea;
     QString m_filePath;
     QString m_fileName;
+    bool m_saved;
 };
 
 #endif // CODEEDITOR_H

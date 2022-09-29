@@ -20,10 +20,12 @@ QtPad::QtPad(QWidget *parent)
     connect(m_ui->actionSave, &QAction::triggered, this, &QtPad::s_saveFile);
     connect(m_ui->actionSave_as, &QAction::triggered, this, &QtPad::s_saveFileAs);
     connect(m_ui->actionExit, &QAction::triggered, this, &QtPad::s_exitApp);
-    connect(m_ui->tabWidget->tabBar(), &QTabBar::tabCloseRequested, this, &QtPad::s_closeTab);
+    connect(m_ui->tabWidget, &QTabWidget::tabCloseRequested, this, &QtPad::s_closeTab);
 
-    connect(m_ui->treeView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(s_treeFileClicked(QModelIndex)));
-    connect(m_ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(s_tabChanged(int)));
+    //connect(m_ui->treeView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(s_treeFileClicked(QModelIndex))); ddduhhhh
+    connect(m_ui->treeView, &QTreeView::doubleClicked, this, &QtPad::s_treeFileClicked);
+    //connect(m_ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(s_tabChanged(int)));
+    connect(m_ui->tabWidget, &QTabWidget::currentChanged, this, &QtPad::s_tabChanged);
 }
 
 QtPad::~QtPad()
@@ -42,6 +44,7 @@ void QtPad::s_openFile()
     QString oppenedFileName = openedFilePath.split("/").back();
     addEditor(oppenedFileName, openedFilePath);
     openFile();
+    m_currentEditor->save();
 }
 
 void QtPad::s_openFolder()
@@ -66,12 +69,17 @@ void QtPad::s_openFolder()
 
 void QtPad::s_saveFile()
 {
+    if (m_currentEditor->isSaved()){
+        return;
+    }
+
     if (m_currentEditor->getFilePath().isEmpty()){
         m_currentEditor->setFilePath(QFileDialog::getSaveFileName(this, "save file name"));
     }
     saveFile();
     setWindowTitle(m_currentEditor->getFileName()); //todo
     m_ui->tabWidget->setTabText(m_ui->tabWidget->currentIndex(), m_currentEditor->getFileName());
+    m_currentEditor->save();
     qDebug() << "Saved document: " << m_currentEditor->getFileName();
 }
 
@@ -81,6 +89,7 @@ void QtPad::s_saveFileAs()
     saveFile();
     setWindowTitle(m_currentEditor->getFileName()); //todo
     m_ui->tabWidget->setTabText(m_ui->tabWidget->currentIndex(), m_currentEditor->getFileName());
+    m_currentEditor->save();
     qDebug() << "Saved document as: " << m_currentEditor->getFileName();
 }
 
@@ -91,6 +100,7 @@ void QtPad::s_exitApp()
 }
 
 void QtPad::s_treeFileClicked(const QModelIndex &index) {
+    qDebug() << "open file";
     if (!m_fsModel->isDir(index))//TODO open new tab
     {
         QString openedFilePath = m_fsModel->filePath(index);
@@ -100,6 +110,7 @@ void QtPad::s_treeFileClicked(const QModelIndex &index) {
         qDebug() << "Selected document m_currentFileName: " << openedFileName;
         addEditor(openedFileName, openedFilePath);
         openFile();
+        m_currentEditor->save();
     }
 }
 void QtPad::s_tabChanged(int index)
@@ -118,20 +129,21 @@ void QtPad::s_closeTab(int index)
 {
     m_ui->tabWidget->setCurrentIndex(index);
     m_currentEditor = (CodeEditor*) m_ui->tabWidget->widget(index);
-    QMessageBox msgBox;
-    msgBox.setText("The document has been modified.");
-    msgBox.setInformativeText("Do you want to save your changes?");
-    msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard);
-    msgBox.setDefaultButton(QMessageBox::Save);
+    if (!m_currentEditor->isSaved()){
+        QMessageBox msgBox;
+        msgBox.setText("The document has been modified.");
+        msgBox.setInformativeText("Do you want to save your changes?");
+        msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard);
+        msgBox.setDefaultButton(QMessageBox::Save);
 
-    int ret = msgBox.exec();
-    if (ret == QMessageBox::Save){
-        if (m_currentEditor->getFilePath().isEmpty()){
-            m_currentEditor->setFilePath(QFileDialog::getSaveFileName(this, "save file name"));
+        int ret = msgBox.exec();
+        if (ret == QMessageBox::Save){
+            if (m_currentEditor->getFilePath().isEmpty()){
+                m_currentEditor->setFilePath(QFileDialog::getSaveFileName(this, "save file name"));
+            }
+            saveFile();
         }
-        saveFile();
     }
-
 
     m_ui->tabWidget->removeTab(index);
     if(m_ui->tabWidget->count() != 0){
@@ -143,8 +155,10 @@ void QtPad::s_closeTab(int index)
 
 void QtPad::saveFile() //TODO security checks
 {
+    if (m_currentEditor->isSaved()){
+        return;
+    }
     QFile file(m_currentEditor->getFilePath());
-
     if (!file.open(QIODevice::WriteOnly | QFile::Text)) {
         QMessageBox::warning(this, "Warning", "Cannot save file: " + file.errorString());
         return;
@@ -153,6 +167,7 @@ void QtPad::saveFile() //TODO security checks
     QString  text = m_currentEditor->toPlainText();
     out << text;
     file.close();
+    m_currentEditor->save();
 }
 
 void QtPad::openFile()//TODO security checks
