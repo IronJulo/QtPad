@@ -4,3 +4,4 @@ Small notepad using Qt as a learning project
 ![image](https://user-images.githubusercontent.com/58080822/191981813-22c13f95-23cf-4a3e-8ebc-473c183c2408.png)
 ![image](https://user-images.githubusercontent.com/58080822/192296871-c8c5260a-7080-4a07-bd12-69313c0ad41e.png)
 ![image](https://user-images.githubusercontent.com/58080822/192808719-d217e9bf-0e88-4ae8-97de-78871bfb7981.png)
+![image](https://user-images.githubusercontent.com/58080822/193287739-c0020e48-3879-433f-a473-c2a1b50ac852.png)
