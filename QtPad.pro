@@ -12,12 +12,14 @@ SOURCES += \
     codeeditor.cpp \
     linenumberarea.cpp \
     main.cpp \
-    qtpad.cpp
+    qtpad.cpp \
+    terminal.cpp
 
 HEADERS += \
     codeeditor.h \
     linenumberarea.h \
-    qtpad.h
+    qtpad.h \
+    terminal.h
 
 FORMS += \
     qtpad.ui

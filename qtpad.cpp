@@ -6,6 +6,7 @@
 #include "codeeditor.h"
 #include "qtpad.h"
 #include "ui_qtpad.h"
+#include "terminal.h"
 
 QtPad::QtPad(QWidget *parent)
     : QMainWindow(parent)
@@ -26,6 +27,12 @@ QtPad::QtPad(QWidget *parent)
     connect(m_ui->treeView, &QTreeView::doubleClicked, this, &QtPad::s_treeFileClicked);
     //connect(m_ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(s_tabChanged(int)));
     connect(m_ui->tabWidget, &QTabWidget::currentChanged, this, &QtPad::s_tabChanged);
+
+    Terminal *term = new Terminal;
+    /*term->setMinimumWidth(500);
+    term->setMaximumHeight(50);*/
+
+    m_ui->splitter_2->addWidget(term);
 }
 
 QtPad::~QtPad()
