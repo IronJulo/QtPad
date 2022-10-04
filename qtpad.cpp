@@ -29,9 +29,6 @@ QtPad::QtPad(QWidget *parent)
     connect(m_ui->tabWidget, &QTabWidget::currentChanged, this, &QtPad::s_tabChanged);
 
     Terminal *term = new Terminal;
-    /*term->setMinimumWidth(500);
-    term->setMaximumHeight(50);*/
-
     m_ui->splitter_2->addWidget(term);
 }
 

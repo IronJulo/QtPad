@@ -8,8 +8,6 @@ Terminal::Terminal(QWidget *parent) : QWidget(parent)
                        //"-geometry","180x800",
                        "-bg", "black",
                        "-fa", "Monospace",
-                       //"-fs", "10",
-                       //"-fullscreen",
                        "-e", "resize -s 20 315; zsh;"};
 
     process.start("/usr/bin/xterm", qsl);
