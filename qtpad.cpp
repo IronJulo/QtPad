@@ -28,8 +28,8 @@ QtPad::QtPad(QWidget *parent)
     //connect(m_ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(s_tabChanged(int)));
     connect(m_ui->tabWidget, &QTabWidget::currentChanged, this, &QtPad::s_tabChanged);
 
-    Terminal *term = new Terminal;
-    m_ui->splitter_2->addWidget(term);
+    /*Terminal *term = new Terminal;
+    m_ui->splitter_2->addWidget(term);*/
 }
 
 QtPad::~QtPad()
